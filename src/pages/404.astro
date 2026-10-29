@@ -1,0 +1,24 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { atlasImage, atlasSize } from '../lib/atlas';
+
+const base = import.meta.env.BASE_URL;
+const processes = (await getCollection('processes')).sort((a, b) => a.data.order - b.data.order);
+---
+<Base title="Page not found" description="This page does not exist on Earth Processes in Brazil.">
+  {/* The atlas map without its markers: the address points to no place on it */}
+  <div class="not-found">
+    <img class="not-found-map" src={`${base}${atlasImage}`} alt="" width={atlasSize.width} height={atlasSize.height} />
+    <div>
+      <h1>This place is not on the map</h1>
+      <p>This address does not match any page on the site. The link may be mistyped, or the page may have moved.</p>
+      <p>Go to the <a href={base}>Home page</a>, <a href={`${base}about/`}>About</a>, or <a href={`${base}references/`}>References</a>, or open one of the Earth Processes pages:</p>
+      <ul>
+        {processes.map((p) => (
+          <li><a href={`${base}processes/${p.id}/`}>Week {p.data.week}: {p.data.title}</a></li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</Base>

@@ -1,0 +1,239 @@
+---
+import { readFileSync } from 'node:fs';
+import { imageMetadata } from 'astro/assets/utils';
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { atlasCredit, atlasImage, atlasSize, labelsLeft, pinStyle } from '../lib/atlas';
+
+const page = await getEntry('pages', 'home');
+if (!page) throw new Error('src/content/pages/home.md is missing');
+const { Content } = await render(page);
+const base = import.meta.env.BASE_URL;
+const processes = (await getCollection('processes')).sort((a, b) => a.data.order - b.data.order);
+
+// Optional: the author's own places, in yellow on the atlas (set `authorPlaces` in home.md).
+// A place that coincides with a process marker rings that marker instead of adding a second dot.
+const authorPlaces = page.data.authorPlaces ?? [];
+const near = (a: { lat: number; lon: number }, b: { lat: number; lon: number }) =>
+  Math.abs(a.lat - b.lat) < 0.5 && Math.abs(a.lon - b.lon) < 0.5;
+const ringsProcess = (place?: { lat: number; lon: number }) => !!place && authorPlaces.some((a) => near(a, place));
+const homeMarkers = authorPlaces.filter((a) => !processes.some((p) => p.data.place && near(a, p.data.place)));
+
+// Hero photos: the Home default first, then one per place that has a photo. Hovering, focusing, or
+// choosing a place on the atlas swaps the hero to that place's photo (see the script below).
+// Each photo has a .webp copy beside its .jpg in public/.
+type Photo = { key: string; src: string; alt: string; credit: string };
+const photos: Photo[] = [];
+const addPhoto = (key: string, photo?: { src: string; alt: string; credit: string }) => {
+  if (photo && !photos.some((p) => p.src === photo.src)) photos.push({ key, ...photo });
+};
+if (page.data.image) addPhoto('home', { src: page.data.image, alt: page.data.imageAlt ?? '', credit: page.data.imageCredit ?? '' });
+processes.forEach((p) => addPhoto(p.id, p.data.place?.photo));
+homeMarkers.forEach((a, i) => addPhoto(`me-${i}`, a.photo));
+// the key of the photo shown for a place (a shared photo keeps the first key that used it)
+const photoKey = (photo?: { src: string }) => photos.find((p) => p.src === photo?.src)?.key;
+// an author's place without its own photo shows the photo of the process marker it rings
+const placePhotoKey = (a: (typeof authorPlaces)[number]) =>
+  photoKey(a.photo ?? processes.find((p) => p.data.place && near(a, p.data.place))?.data.place?.photo);
+// the author's place a marker stands for, so the list of places and the map highlight together
+const placeIndex = (place?: { lat: number; lon: number }) => {
+  const i = place ? authorPlaces.findIndex((a) => near(a, place)) : -1;
+  return i < 0 ? undefined : String(i);
+};
+const anyPublished = processes.some((p) => !p.data.draft);
+const photoSizes = await Promise.all(photos.map((p) => imageMetadata(readFileSync(`public/${p.src}`))));
+const webp = (src: string) => src.replace(/\.jpe?g$/, '.webp');
+---
+<Base title={page.data.title} description={page.data.description}>
+  {/* Title block, in editorial order: headline, dek, byline */}
+  <header class="page-head">
+    <h1>{page.data.title}</h1>
+    {page.data.standfirst && <p class="standfirst">{page.data.standfirst}</p>}
+    <p class="byline">By <span class="byline-name">Vitor Figueredo</span> · <a href={`${base}about/#my-connection-to-brazil`}>My connection to Brazil</a></p>
+    {/* The author's places, the same yellow marks as on the map: pointing to one shows its photo */}
+    {authorPlaces.length > 0 && (
+      <div class="my-places">
+        <p class="my-places-label" id="my-places-label">My places <span class="my-places-hint">(point to one to see it)</span></p>
+        <ul aria-labelledby="my-places-label">
+          {authorPlaces.map((a, i) => (
+            <li>
+              <button type="button" data-photo={placePhotoKey(a)} data-place={String(i)}>
+                <span class="atlas-key-mark is-home" aria-hidden="true"></span>
+                <span lang="pt-BR">{a.name}</span>
+                <span class="my-places-note">({a.note})</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </header>
+
+  {/* Full-width hero: the photo of Brazil and the Earth Processes atlas, side by side on wide screens */}
+  <section class="hero" aria-labelledby="processes-heading">
+    {photos.length > 0 && (
+      <figure class="hero-photo">
+        <div class="hero-photo-frame">
+          {photos.map((p, i) => (
+            <picture class="hero-photo-layer" data-photo-layer={p.key} data-active={i === 0 ? '' : undefined}>
+              {/* only the first photo loads with the page; the others load on the first atlas interaction */}
+              <source type="image/webp" {...(i === 0 ? { srcset: `${base}${webp(p.src)}` } : { 'data-srcset': `${base}${webp(p.src)}` })} />
+              <img
+                {...(i === 0 ? { src: `${base}${p.src}`, fetchpriority: 'high' } : { 'data-src': `${base}${p.src}` })}
+                alt={i === 0 ? p.alt : ''}
+                data-alt={p.alt}
+                width={photoSizes[i].width}
+                height={photoSizes[i].height}
+                decoding="async"
+              />
+            </picture>
+          ))}
+        </div>
+        <figcaption aria-live="polite">
+          {photos.map((p, i) => (
+            <span class="hero-photo-caption" data-photo-layer={p.key} data-active={i === 0 ? '' : undefined}>{p.credit}</span>
+          ))}
+        </figcaption>
+      </figure>
+    )}
+    <div class="atlas hero-atlas">
+      {/* id "processes-heading": the "All Earth Processes" link on every Earth Processes page points here */}
+      <h2 class="visually-hidden" id="processes-heading">Earth Processes</h2>
+      <figure class="atlas-plate">
+        <div class="atlas-map">
+          <img
+            src={`${base}${atlasImage}`}
+            alt={`Map of Brazil with five numbered markers, one for each Earth Processes page in the list that goes with it${authorPlaces.length ? `, and yellow markers for my places: ${authorPlaces.map((a) => `${a.name} (${a.note})`).join(', ')}` : ''}.`}
+            width={atlasSize.width}
+            height={atlasSize.height}
+          />
+          {processes.filter((p) => p.data.place).map((p) => (
+            <a
+              class:list={['atlas-pin', { 'is-draft': p.data.draft, 'label-left': labelsLeft(p.data.place!), 'is-home-ring': ringsProcess(p.data.place) }]}
+              href={`${base}processes/${p.id}/`}
+              style={pinStyle(p.data.place!.lat, p.data.place!.lon)}
+              data-process={p.id}
+              data-photo={photoKey(p.data.place?.photo)}
+              data-place={ringsProcess(p.data.place) ? placeIndex(p.data.place) : undefined}
+              tabindex="-1"
+              aria-hidden="true"
+            >{processes.indexOf(p) + 1}<span class="atlas-pin-label" lang={p.data.place!.localName ? 'pt-BR' : undefined}>{p.data.place!.localName ?? p.data.place!.name.split(',')[0]}</span></a>
+          ))}
+          {homeMarkers.map((a) => (
+            <button
+              type="button"
+              class:list={['atlas-pin atlas-pin-home', { 'label-left': labelsLeft(a) }]}
+              style={pinStyle(a.lat, a.lon)}
+              data-photo={photoKey(a.photo)}
+              data-place={placeIndex(a)}
+              aria-label={a.photo ? `Show a photo of ${a.name} (${a.note})` : `${a.name} (${a.note})`}
+            >
+              <span class="atlas-pin-label" lang="pt-BR" aria-hidden="true">{a.name}</span>
+            </button>
+          ))}
+        </div>
+        <ol class="atlas-legend">
+          {processes.map((p, i) => (
+            <li>
+              <a href={`${base}processes/${p.id}/`} data-process={p.id} data-photo={photoKey(p.data.place?.photo)}>
+                <span class:list={['atlas-num', { 'is-draft': p.data.draft }]} aria-hidden="true">{i + 1}</span>
+                <span class="atlas-text">
+                  <span class="atlas-title">{p.data.title}</span>
+                  <span class="atlas-meta">Week {p.data.week} · {p.data.draft ? 'Coming soon' : 'Published'}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+        <figcaption>
+          <span class="atlas-caption-lead">Where each weekly page looks at Brazil: one Earth Processes page each week, from Week 2 to Week 6.</span>
+          <span class="atlas-key">
+            <span class="atlas-key-item"><span class="atlas-key-mark is-draft" aria-hidden="true"></span>Coming soon</span>
+            {anyPublished && <span class="atlas-key-item"><span class="atlas-key-mark" aria-hidden="true"></span>Published</span>}
+            {authorPlaces.length > 0 && (
+              <span class="atlas-key-item"><span class="atlas-key-mark is-home" aria-hidden="true"></span>My places</span>
+            )}
+          </span>
+          <span class="atlas-credit">{atlasCredit} All sources are on the <a href={`${base}references/`}>References</a> page.</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <div class="prose">
+    <Content />
+  </div>
+</Base>
+
+<script>
+  // Highlight a marker and its legend entry (or an author's place in the list above) together, and
+  // show the place's photo in the hero, while one is hovered or focused. A tap or click keeps that
+  // photo; moving the mouse away from the map and the list brings back the photo that was kept.
+  const atlas = document.querySelector<HTMLElement>('.atlas');
+  const hero = document.querySelector<HTMLElement>('.hero');
+  const myPlaces = document.querySelector<HTMLElement>('.my-places');
+  if (atlas && hero) {
+    const groups = [atlas, myPlaces].filter((el): el is HTMLElement => !!el);
+    const triggers = groups.flatMap((g) => [...g.querySelectorAll<HTMLElement>('[data-photo], [data-process], [data-place]')]);
+    const layers = [...hero.querySelectorAll<HTMLElement>('[data-photo-layer]')];
+    const frame = hero.querySelector<HTMLElement>('.hero-photo-frame');
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    let kept = layers[0]?.dataset.photoLayer;
+    let loaded = false;
+    // the extra photos load the first time someone reaches for the atlas or the list of places
+    const loadPhotos = () => {
+      if (loaded) return;
+      loaded = true;
+      hero.querySelectorAll<HTMLElement>('[data-srcset]').forEach((el) => el.setAttribute('srcset', el.dataset.srcset!));
+      hero.querySelectorAll<HTMLImageElement>('img[data-src]').forEach((img) => (img.src = img.dataset.src!));
+    };
+    const showPhoto = (key?: string) => {
+      if (!key || !layers.some((l) => l.dataset.photoLayer === key)) return;
+      loadPhotos();
+      layers.forEach((l) => {
+        const active = l.dataset.photoLayer === key;
+        l.toggleAttribute('data-active', active);
+        const img = l.querySelector('img');
+        if (img) img.alt = active ? img.dataset.alt ?? '' : '';
+      });
+    };
+    const setActive = (el: HTMLElement | null) => {
+      triggers.forEach((t) => {
+        const same = !!el && ((!!el.dataset.process && t.dataset.process === el.dataset.process) ||
+          (!!el.dataset.place && t.dataset.place === el.dataset.place));
+        t.classList.toggle('is-active', same);
+      });
+    };
+    const reset = () => {
+      setActive(null);
+      showPhoto(kept);
+    };
+    groups.forEach((g) => {
+      g.addEventListener('pointerenter', loadPhotos, { once: true });
+      g.addEventListener('focusin', loadPhotos, { once: true });
+      g.addEventListener('pointerleave', (event) => { if (event.pointerType === 'mouse') reset(); });
+      g.addEventListener('focusout', (event) => {
+        if (!groups.some((other) => other.contains(event.relatedTarget as Node))) reset();
+      });
+    });
+    triggers.forEach((el) => {
+      const activate = () => {
+        setActive(el);
+        showPhoto(el.dataset.photo);
+      };
+      el.addEventListener('pointerenter', activate);
+      el.addEventListener('focus', activate);
+      if (el.tagName === 'BUTTON') {
+        el.addEventListener('click', () => {
+          activate();
+          if (el.dataset.photo) kept = el.dataset.photo;
+          // on narrow screens the photo can be off screen: bring it into view so the tap shows something
+          const box = frame?.getBoundingClientRect();
+          if (frame && box && (box.top < 0 || box.bottom > innerHeight)) {
+            frame.scrollIntoView({ block: 'nearest', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+          }
+        });
+      }
+    });
+  }
+</script>

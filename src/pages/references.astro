@@ -1,0 +1,14 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const page = await getEntry('pages', 'references');
+if (!page) throw new Error('src/content/pages/references.md is missing');
+const { Content } = await render(page);
+---
+<Base title={page.data.title} description={page.data.description}>
+  <h1>{page.data.title}</h1>
+  <div class="references prose">
+    <Content />
+  </div>
+</Base>

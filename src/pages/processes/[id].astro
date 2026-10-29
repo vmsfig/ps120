@@ -1,0 +1,72 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { atlasCredit, atlasImage, atlasSize, pinStyle } from '../../lib/atlas';
+
+export async function getStaticPaths() {
+  const processes = (await getCollection('processes')).sort((a, b) => a.data.order - b.data.order);
+  return processes.map((entry, i) => ({
+    params: { id: entry.id },
+    props: { entry, prev: processes[i - 1], next: processes[i + 1] },
+  }));
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content } = await render(entry);
+const base = import.meta.env.BASE_URL;
+const questions = entry.data.questions ?? [];
+---
+<Base title={entry.data.title} description={entry.data.summary}>
+  <h1>{entry.data.title}</h1>
+  {entry.data.draft && <p class="page-status"><span class="badge">Week {entry.data.week} · Coming soon</span></p>}
+  {entry.data.place && (
+    <figure class="place-card">
+      <div class="atlas-map">
+        <img src={`${base}${atlasImage}`} alt="" width={atlasSize.width} height={atlasSize.height} />
+        <span
+          class:list={['atlas-pin', { 'is-draft': entry.data.draft }]}
+          style={pinStyle(entry.data.place.lat, entry.data.place.lon)}
+          aria-hidden="true"
+        >{entry.data.order}</span>
+      </div>
+      <figcaption>
+        <span class="place-card-name">
+          {entry.data.place.name}
+          {entry.data.place.localName && <> · <i lang="pt-BR">{entry.data.place.localName}</i></>}
+        </span>
+        Where this page looks at Brazil. <a href={`${base}#processes-heading`}>See all five places on the Home map</a>. {atlasCredit}
+      </figcaption>
+    </figure>
+  )}
+  {entry.data.draft && (
+    <p class="placeholder-note">
+      This page will look at {entry.data.title.toLowerCase()} in Brazil{entry.data.place && <>, through one place on the map: {entry.data.place.name}</>}. It will be published in Week {entry.data.week}.
+    </p>
+  )}
+  <div class="prose">
+    <Content />
+  </div>
+  {entry.data.draft && questions.length > 0 && (
+    <section class="questions" aria-labelledby="questions-heading">
+      <h2 id="questions-heading">Questions this page will answer</h2>
+      <ol>
+        {questions.map((q) => <li>{q}</li>)}
+      </ol>
+    </section>
+  )}
+  <nav class="process-nav" aria-label="Earth Processes">
+    {prev ? (
+      <a class="process-nav-prev" href={`${base}processes/${prev.id}/`}>
+        <span class="process-nav-label">Previous · Week {prev.data.week}</span>
+        {prev.data.title}
+      </a>
+    ) : <span />}
+    {next && (
+      <a class="process-nav-next" href={`${base}processes/${next.id}/`}>
+        <span class="process-nav-label">Next · Week {next.data.week}</span>
+        {next.data.title}
+      </a>
+    )}
+    <a class="process-nav-all" href={`${base}#processes-heading`}>All Earth Processes</a>
+  </nav>
+</Base>

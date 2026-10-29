@@ -1,0 +1,741 @@
+:root {
+  --green: #0b6e3b;
+  --green-dark: #084d2a;
+  --yellow: #f2c230;
+  --blue: #1d3f8f;
+  --ink: #1d2320;
+  --muted: #5b655f;
+  --paper: #fbfaf6;
+  --line: #e2e0d6;
+  --tint: #f2f0e6;
+  --surface: #fff;
+  --green-wash: #eef5f0;
+  --on-green: #fff;
+  --on-green-soft: rgb(255 255 255 / 0.45);
+  --on-green-muted: rgb(255 255 255 / 0.8);
+  --shadow-pop: 0 6px 14px -6px rgb(0 0 0 / 0.28);
+  --graticule: rgb(11 110 59 / 0.08);
+  --shadow-pin: 0 2px 4px rgb(0 0 0 / 0.25);
+
+  /* One column for header, page, and footer. On wide screens, section headings take a left
+     rail and reading text keeps its own measure: rail + gap + measure = wide */
+  --wide: 56rem;
+  --measure: 37rem; /* ~74 characters of Georgia at body size */
+  --rail: 16rem;
+  --rail-gap: 3rem;
+  --gutter: 1.25rem;
+  --edge: max(var(--gutter), (100% - var(--wide)) / 2);
+
+  /* Spacing scale (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Type roles: Archivo carries headings and interface, Georgia carries reading */
+  --font-ui: 'Archivo Variable', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-body: Georgia, 'Times New Roman', serif;
+  --text-meta: 0.84rem;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scrollbar-gutter: stable; /* no sideways jump between long and short pages */
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+::selection { background: var(--yellow); color: var(--ink); }
+
+a {
+  color: var(--blue);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+a:hover { text-decoration-thickness: 2px; }
+
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.site-header :focus-visible { outline-color: var(--yellow); }
+
+main p, main li { text-wrap: pretty; }
+main:focus { outline: none; }
+
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 20;
+  padding: var(--space-2) var(--space-4);
+  background: var(--yellow);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 4px;
+  transform: translateY(-200%);
+}
+.skip-link:focus { transform: none; }
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-6);
+  padding: var(--space-2) var(--edge);
+  background: var(--green);
+  border-bottom: 4px solid var(--yellow);
+  font-family: var(--font-ui);
+}
+
+.brand {
+  display: inline-block;
+  line-height: 2.75rem;
+  color: var(--on-green);
+  font-weight: 750;
+  font-stretch: 88%;
+  font-size: 1.2rem;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+}
+.brand span { color: var(--yellow); }
+
+nav { font-size: 0.95rem; font-weight: 500; }
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-4);
+}
+.nav-links > a, .dropdown summary, .menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--on-green);
+  text-decoration: none;
+  cursor: pointer;
+}
+.nav-links > a:hover, .dropdown summary:hover { box-shadow: inset 0 -2px 0 var(--on-green-soft); }
+
+.menu-toggle {
+  display: none;
+  padding: 0 var(--space-4);
+  font: inherit;
+  font-weight: 600;
+  background: none;
+  border: 1px solid var(--on-green-soft);
+  border-radius: 6px;
+}
+.menu-toggle:hover { border-color: var(--on-green); }
+nav a[aria-current='page'] { box-shadow: inset 0 -2px 0 var(--yellow); }
+
+.dropdown { position: relative; }
+.dropdown summary { list-style: none; gap: 0.45rem; }
+.dropdown summary::after {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-top: -0.2rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dropdown[open] summary::after { transform: translateY(0.2rem) rotate(-135deg); }
+.dropdown summary::-webkit-details-marker { display: none; }
+.dropdown ul {
+  position: absolute;
+  right: 0;
+  z-index: 10;
+  min-width: 20rem;
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0;
+  list-style: none;
+  background: var(--paper);
+  border: 1px solid var(--green-dark);
+  border-top: 3px solid var(--green);
+  box-shadow: var(--shadow-pop);
+}
+.dropdown-title { display: block; }
+.dropdown-status {
+  display: block;
+  font-size: var(--text-meta);
+  font-weight: 400;
+  color: var(--muted);
+}
+.dropdown-week {
+  flex: none;
+  width: 4.25rem;
+  font-size: var(--text-meta);
+  font-weight: 600;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+.dropdown:has(a[aria-current='page']) summary { box-shadow: inset 0 -2px 0 var(--yellow); }
+.dropdown li a {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: var(--space-1) var(--space-4);
+  line-height: 1.3;
+  color: var(--ink);
+  text-decoration: none;
+}
+.dropdown li a:hover, .dropdown li a[aria-current='page'] { background: var(--green-wash); }
+
+main {
+  counter-reset: figure;
+  flex: 1;
+  overflow-x: clip; /* keeps full-bleed decoration from adding a horizontal scrollbar */
+  padding: var(--space-8) var(--edge) var(--space-16);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-ui);
+  color: var(--green-dark);
+  text-wrap: balance;
+}
+h1 {
+  font-size: clamp(2.1rem, 1.35rem + 3vw, 3.25rem);
+  font-weight: 800;
+  font-stretch: 82%;
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+  margin: 0.75rem 0 1.5rem;
+}
+h2 {
+  font-size: clamp(1.45rem, 1.2rem + 1vw, 1.8rem);
+  font-weight: 700;
+  font-stretch: 88%;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  margin: 2.75rem 0 0.6rem;
+}
+h3 {
+  font-size: 1.2rem;
+  font-weight: 650;
+  line-height: 1.25;
+  margin: 2rem 0 0.4rem;
+}
+
+/* Home hero: breaks out of the column to the full window width as one atlas plate.
+   The photo and the map sit on the same tinted, gridded ground, each framed with the same margin,
+   so neither half overpowers the other. Below 64em the photo stacks over the atlas. */
+.hero {
+  display: grid;
+  margin: 0 calc(50% - 50vw) var(--space-12);
+  background-color: var(--tint);
+  /* a faint latitude/longitude grid across the whole plate */
+  background-image:
+    repeating-linear-gradient(0deg, var(--graticule) 0 1px, transparent 1px 2rem),
+    repeating-linear-gradient(90deg, var(--graticule) 0 1px, transparent 1px 2rem);
+  border-block: 1px solid var(--line);
+}
+.hero-photo {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: var(--space-6) var(--gutter) 0;
+}
+.hero-photo-frame {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--line);
+}
+/* One layer per place, stacked; the active one settles into view as the old one fades.
+   The slow settle (a slight zoom out) reads like the view moving to the new place. */
+.hero-photo-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  scale: 1.04;
+  transition: opacity 260ms ease-in, scale 0s linear 260ms;
+}
+.hero-photo-layer[data-active] {
+  z-index: 1;
+  opacity: 1;
+  scale: 1;
+  transition: opacity 420ms cubic-bezier(0.16, 1, 0.3, 1), scale 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hero-photo-layer img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hero-photo-caption:not([data-active]) { display: none; }
+.hero-photo-caption[data-active] { animation: caption-in 300ms ease-out; }
+@keyframes caption-in { from { opacity: 0; } }
+.hero-atlas { padding: var(--space-6) var(--gutter) var(--space-8); }
+/* stacked over the atlas on tablets: a wide crop, so the reading text is not three screens down */
+@media (min-width: 38em) and (max-width: 63.99em) {
+  .hero-photo-frame { aspect-ratio: 16 / 9; }
+}
+@media (min-width: 64em) {
+  .hero { grid-template-columns: 1fr 1fr; }
+  .hero-photo { padding: var(--space-6) 0 var(--space-6) var(--space-6); }
+  /* the photo fills whatever height the atlas sets */
+  .hero-photo-frame { flex: 1 1 0; min-height: 0; aspect-ratio: auto; }
+  .hero-atlas {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    padding: var(--space-6);
+  }
+  .hero-atlas .atlas-plate { width: 100%; max-width: 44rem; }
+}
+
+.placeholder-note { max-width: var(--measure); }
+/* Home title block: the headline, a dek in the reading face, then a small byline; grouped tight */
+.page-head { margin: 0 0 var(--space-8); }
+.page-head h1 { margin-bottom: var(--space-2); }
+.standfirst {
+  max-width: var(--measure);
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: clamp(1.15rem, 1rem + 0.6vw, 1.4rem);
+  font-style: italic;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.byline {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-meta);
+  color: var(--muted);
+}
+.byline-name { font-weight: 650; color: var(--green-dark); }
+/* The author's places, one quiet line under the byline with the map's yellow marks */
+.my-places {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-3);
+  margin-top: var(--space-1);
+  font-family: var(--font-ui);
+  font-size: var(--text-meta);
+  color: var(--muted);
+}
+.my-places-label { margin: 0; }
+.my-places ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.my-places button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2rem;
+  padding: 0;
+  font: inherit;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-decoration: underline dotted var(--line);
+  text-underline-offset: 0.25em;
+}
+.my-places button:hover, .my-places button.is-active { text-decoration-color: var(--green); }
+.my-places-note { color: var(--muted); }
+.my-places .atlas-key-mark { flex: none; width: 0.6rem; height: 0.6rem; }
+/* Figures read like an atlas: numbered plates with a source line */
+main figure:not(.place-card) { counter-increment: figure; }
+main figcaption {
+  font-family: var(--font-ui);
+  font-size: var(--text-meta);
+  line-height: 1.4;
+  color: var(--muted);
+  margin-top: var(--space-2);
+}
+main figure:not(.place-card) > figcaption::before {
+  content: 'Figure ' counter(figure) '. ';
+  font-weight: 650;
+  color: var(--green-dark);
+}
+
+/* Home atlas: the five weekly pages pinned to places on a map of Brazil, laid out like an atlas plate */
+.atlas { scroll-margin-top: var(--space-6); }
+.atlas-plate {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+}
+.atlas-plate figcaption { margin-top: 0; }
+.atlas-map { position: relative; container-type: inline-size; }
+.atlas-map img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+}
+.atlas-pin, .atlas-num {
+  display: block;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--green-dark);
+  color: var(--on-green);
+  font: 700 0.8rem/1.6rem var(--font-ui);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  transition: background-color 160ms ease-out, color 160ms ease-out, scale 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.atlas-pin {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  translate: -50% -50%;
+  text-decoration: none;
+  box-shadow: 0 0 0 2px var(--paper), var(--shadow-pin);
+}
+/* a larger invisible hit area around each small marker */
+.atlas-pin::before { content: ''; position: absolute; inset: -0.5rem; }
+/* outlined markers are pages still to come; solid ones are published */
+.atlas-pin.is-draft, .atlas-num.is-draft {
+  background: var(--paper);
+  color: var(--green-dark);
+  box-shadow: inset 0 0 0 2px var(--green-dark);
+}
+.atlas-pin.is-draft { box-shadow: inset 0 0 0 2px var(--green-dark), 0 0 0 2px var(--paper), var(--shadow-pin); }
+/* the author's own place: a smaller yellow marker, not a link */
+.atlas-pin-home {
+  width: 1rem;
+  height: 1rem;
+  background: var(--yellow);
+  box-shadow: inset 0 0 0 2px var(--green-dark), 0 0 0 2px var(--paper), var(--shadow-pin);
+}
+.atlas-pin-home { padding: 0; border: 0; cursor: pointer; }
+.atlas-pin-home:hover, .atlas-pin-home:focus-visible, .atlas-pin-home.is-active { scale: 1.25; }
+/* a process marker that is also one of the author's places gets a yellow ring */
+.atlas-pin.is-home-ring { box-shadow: inset 0 0 0 2px var(--green-dark), 0 0 0 3px var(--yellow), 0 0 0 4px var(--green-dark), var(--shadow-pin); }
+/* Place names beside the markers, set like map lettering with a paper halo */
+.atlas-pin-label {
+  display: none;
+  position: absolute;
+  left: calc(100% + var(--space-2));
+  top: 50%;
+  translate: 0 -50%;
+  white-space: nowrap;
+  font-size: var(--text-meta);
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--green-dark);
+  text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 3px var(--paper);
+}
+/* markers in the eastern half of the map put their name on the left so it stays on the map */
+.atlas-pin.label-left .atlas-pin-label { left: auto; right: calc(100% + var(--space-2)); }
+/* names only when the map is wide enough for them not to collide */
+@container (min-width: 20rem) {
+  .atlas-pin-label { display: block; }
+}
+.atlas-pin:hover, .atlas-pin.is-active {
+  z-index: 1;
+  scale: 1.2;
+  background: var(--yellow);
+  color: var(--ink);
+}
+.atlas-legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-ui);
+}
+.atlas-legend a {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr;
+  gap: var(--space-3);
+  align-items: start;
+  min-height: 2.75rem;
+  margin-inline: calc(-1 * var(--space-2));
+  padding: var(--space-2);
+  border-radius: 2px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.atlas-legend a:hover, .atlas-legend a.is-active { background: var(--green-wash); }
+.atlas-legend a:hover .atlas-num, .atlas-legend a.is-active .atlas-num { background: var(--yellow); color: var(--ink); }
+.atlas-title {
+  display: block;
+  font-size: 0.98rem;
+  font-weight: 650;
+  line-height: 1.25;
+  color: var(--green-dark);
+  text-wrap: balance;
+}
+.atlas-meta {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--text-meta);
+  line-height: 1.35;
+  color: var(--muted);
+}
+/* Beyond phone width the legend sits beside the map, like the key on an atlas plate */
+@media (min-width: 38em) {
+  .atlas-plate {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: var(--space-4) var(--space-5);
+    align-items: center;
+  }
+  .atlas-legend { grid-template-columns: 1fr; gap: 0; }
+  .atlas-legend a { padding-block: var(--space-1); }
+  .atlas-title { font-size: 0.9rem; }
+  .atlas-plate figcaption { grid-column: 1 / -1; }
+}
+
+/* Atlas caption in three parts: what the map shows, the marker key, then the source */
+.atlas-plate figcaption > span { display: block; max-width: var(--measure); }
+.atlas-plate figcaption > .atlas-caption-lead { display: inline; } /* stays on the "Figure 2." line */
+.atlas-plate figcaption > .atlas-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin-block: var(--space-2);
+  color: var(--ink);
+}
+.atlas-key-item { display: inline-flex; align-items: center; gap: var(--space-2); }
+.atlas-key-mark {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: var(--green-dark);
+}
+.atlas-key-mark.is-draft { background: var(--paper); box-shadow: inset 0 0 0 2px var(--green-dark); }
+.atlas-key-mark.is-home { width: 0.7rem; height: 0.7rem; background: var(--yellow); box-shadow: inset 0 0 0 2px var(--green-dark); }
+.atlas-credit { font-size: 0.78rem; }
+
+/* Reading text keeps its measure at every width (the left rail below only adds the heading column) */
+.prose-body { max-width: var(--measure); }
+
+/* Reading sections: on wide screens each h2 moves to a left rail and its text keeps a ~74-character measure
+   (from 60em, so the reading column never gets squeezed on tablets) */
+@media (min-width: 60em) {
+  .prose-section {
+    display: grid;
+    grid-template-columns: var(--rail) minmax(0, var(--measure));
+    column-gap: var(--rail-gap);
+    align-items: start;
+  }
+  .prose-section + .prose-section { margin-top: var(--space-12); }
+  .prose-section > h2 {
+    grid-column: 1;
+    margin: 0;
+    padding-top: 0.2rem;
+    font-size: 1.4rem;
+  }
+  .prose-body { grid-column: 2; }
+  .prose-body > :first-child { margin-top: 0; }
+  .prose-body > :last-child { margin-bottom: 0; }
+  /* pages without section headings (References, Earth Processes drafts) keep one left-aligned column */
+  .prose:not(:has(h2)) .prose-body { grid-column: 1 / -1; max-width: var(--measure); }
+}
+
+/* Earth Processes pages */
+.page-status { margin: 0 0 var(--space-6); }
+/* the page's own place, cut from the Home atlas */
+.place-card {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: var(--space-4);
+  align-items: center;
+  max-width: var(--measure);
+  margin: 0 0 var(--space-8);
+  padding: var(--space-3);
+  background: var(--tint);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--green);
+}
+.place-card .atlas-map img { border: 0; }
+.place-card figcaption { margin-top: 0; }
+.place-card-name {
+  display: block;
+  margin: var(--space-1) 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: var(--green-dark);
+}
+@media (min-width: 38em) {
+  .place-card { grid-template-columns: 8rem 1fr; }
+}
+.questions {
+  max-width: var(--measure);
+  margin-top: var(--space-8);
+  padding: var(--space-4) var(--space-6);
+  background: var(--tint);
+  border-radius: 2px;
+}
+.questions h2 { margin-top: 0; font-size: 1.2rem; }
+.questions ol { margin: 0; padding-left: 1.25rem; }
+.process-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-12);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--line);
+  font-family: var(--font-ui);
+}
+.process-nav a {
+  display: block;
+  font-weight: 650;
+  line-height: 1.3;
+  color: var(--green-dark);
+  text-decoration: none;
+}
+.process-nav a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
+.process-nav-next { text-align: right; }
+.process-nav-label {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  color: var(--green);
+}
+.process-nav .process-nav-all {
+  grid-column: 1 / -1;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-size: 0.95rem;
+}
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.65rem;
+  border-radius: 999px;
+  background: var(--yellow);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-meta);
+  font-weight: 600;
+}
+
+/* APA references: hanging indent */
+.references > p, .references li {
+  padding-left: 2em;
+  text-indent: -2em;
+  overflow-wrap: anywhere;
+}
+.references li > p { margin: 0; }
+.references li + li { margin-top: 0.9rem; }
+/* the entry a citation link points to */
+.references li { scroll-margin-top: var(--space-8); }
+.references li:target {
+  margin-inline: calc(-1 * var(--space-3));
+  padding-block: var(--space-2);
+  padding-right: var(--space-3);
+  padding-left: calc(2em + var(--space-3));
+  background: var(--green-wash);
+  box-shadow: inset 3px 0 0 var(--green);
+}
+.references ul { list-style: none; padding: 0; }
+
+.site-footer {
+  padding: var(--space-6) var(--edge);
+  font-family: var(--font-ui);
+  font-size: var(--text-meta);
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropdown summary::after, .atlas-pin, .atlas-num { transition: none; }
+  /* photos still cross-fade (the change of place stays visible) but without the zoom */
+  .hero-photo-layer, .hero-photo-layer[data-active] { scale: 1; transition: opacity 200ms linear; }
+  .hero-photo-caption[data-active] { animation: none; }
+}
+
+/* Narrow screens, or larger user font sizes (em-based): links move behind the Menu button.
+   Without JavaScript the links stay visible and simply wrap. */
+@media (max-width: 38em) {
+  .site-header { position: relative; flex-wrap: nowrap; }
+  .js .menu-toggle { display: inline-flex; }
+  .js .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 15;
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--space-2) var(--edge) var(--space-4);
+    background: var(--green);
+    border-bottom: 4px solid var(--yellow);
+    box-shadow: var(--shadow-pop);
+  }
+  .js nav[data-open] .nav-links { display: flex; }
+  .nav-links > a, .dropdown summary { width: 100%; }
+  .nav-links a[aria-current='page'], .nav-links > a:hover, .dropdown summary:hover { box-shadow: none; }
+  .nav-links a[aria-current='page'] { color: var(--yellow); }
+  .dropdown { position: static; }
+  .dropdown ul {
+    position: static;
+    min-width: 0;
+    margin: 0 0 var(--space-2);
+    padding: 0 0 0 var(--space-4);
+    background: none;
+    border: 0;
+    border-left: 1px solid var(--on-green-soft);
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .dropdown li a { padding-inline: var(--space-3); color: var(--on-green); }
+  .dropdown-week { color: var(--yellow); }
+  .dropdown-status { color: var(--on-green-muted); }
+  .dropdown li a:hover, .dropdown li a[aria-current='page'] { background: none; color: var(--yellow); }
+}
+
+@media (max-width: 560px) {
+  body { font-size: 1.0625rem; }
+}
+
+/* 404: the bare atlas map beside the way back */
+.not-found { display: grid; gap: var(--space-6); max-width: var(--wide); }
+.not-found-map { width: min(12rem, 50%); height: auto; opacity: 0.85; }
+.not-found h1 { margin-top: 0; }
+.not-found p { max-width: var(--measure); }
+@media (min-width: 38em) {
+  .not-found { grid-template-columns: 14rem minmax(0, 1fr); align-items: start; }
+  .not-found-map { width: 100%; }
+}
