@@ -320,14 +320,14 @@ h3 {
 }
 
 .placeholder-note { max-width: var(--measure); }
-/* Home title block: the headline, a dek in the reading face, then a small byline; grouped tight */
+/* Home title block: the headline and its byline, then the author's line in the reading face with his places */
 .page-head { margin: 0 0 var(--space-8); }
 .page-head h1 { margin-bottom: var(--space-2); }
 .standfirst {
   max-width: var(--measure);
-  margin: 0 0 var(--space-3);
+  margin: var(--space-5) 0 0;
   font-family: var(--font-body);
-  font-size: clamp(1.15rem, 1rem + 0.6vw, 1.4rem);
+  font-size: clamp(1.1rem, 1rem + 0.4vw, 1.25rem);
   font-style: italic;
   line-height: 1.35;
   color: var(--ink);
