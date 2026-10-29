@@ -92,10 +92,10 @@ function checkPlaceholders() {
   };
 }
 
-// GitHub Pages: https://vmsfig.github.io/ps120-brazil/
+// GitHub Pages: https://vmsfig.github.io/ps120/
 export default defineConfig({
   site: 'https://vmsfig.github.io',
-  base: '/ps120-brazil',
+  base: '/ps120',
   trailingSlash: 'always',
   // The stylesheet is small: inline it so the first paint does not wait on an extra request
   build: { inlineStylesheets: 'always' },

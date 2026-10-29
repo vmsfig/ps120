@@ -38,7 +38,7 @@ The author is Brazilian. The site explains Brazil's geography from the inside, a
     - Climate Controls, Biomes, and Climate Change
   - **References:** APA style, alphabetical.
 - The Earth Processes pages are placeholders until their week. A `draft: true` page shows a "Coming in Week N" badge.
-- The site is built with Astro and Markdown content in `src/content/`. Every push to `main` deploys it to GitHub Pages at `https://vmsfig.github.io/ps120-brazil/`, under the base path `/ps120-brazil`. The editing workflow must stay "edit a Markdown file, push."
+- The site is built with Astro and Markdown content in `src/content/`. Every push to `main` deploys it to GitHub Pages at `https://vmsfig.github.io/ps120/`, under the base path `/ps120`. The editing workflow must stay "edit a Markdown file, push."
 - The rubric penalizes visible AI use. The author writes or personalizes all content. Drafts stay clearly marked until rewritten, and personal ties are never filled in for the author.
 - Every fact must trace to a source on the References page, and every image needs a visible credit (author, source, license).
 

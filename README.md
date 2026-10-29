@@ -13,7 +13,7 @@ Astro static site. All content is Markdown in `src/content/`.
 
 To publish a weekly article, open its file in `src/content/processes/`, write the content below the `---` block, and change `draft: true` to `draft: false` (removes the "Coming in Week N" badge). Add the new sources to `references.md`.
 
-Images go in `public/images/` and are referenced as `![alt text](/ps120-brazil/images/file.jpg)` inside Markdown.
+Images go in `public/images/` and are referenced as `![alt text](/ps120/images/file.jpg)` inside Markdown.
 
 Photos for places on the Home map live in `public/images/places/`, each as a `.jpg` with a `.webp` copy beside it (1200px wide). A place gets its photo through `photo:` in its front matter (`src`, `alt`, `credit`); the Home default photo is `image:` in `home.md`. To add one:
 
@@ -27,10 +27,10 @@ cwebp -q 78 my-place.jpg -o my-place.webp
 
 ```sh
 npm install
-npm run dev      # http://localhost:4321/ps120-brazil/
+npm run dev      # http://localhost:4321/ps120/
 npm run build    # output in dist/
 ```
 
 ## Deploy
 
-Every push to `main` deploys to https://vmsfig.github.io/ps120-brazil/ via `.github/workflows/deploy.yml`.
+Every push to `main` deploys to https://vmsfig.github.io/ps120/ via `.github/workflows/deploy.yml`.
