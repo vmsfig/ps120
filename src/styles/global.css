@@ -320,18 +320,10 @@ h3 {
 }
 
 .placeholder-note { max-width: var(--measure); }
-/* Home title block: the headline and its byline, then the author's line in the reading face with his places */
+/* Home title block: the headline, a small byline that carries the author's own line, then his places */
 .page-head { margin: 0 0 var(--space-8); }
 .page-head h1 { margin-bottom: var(--space-2); }
-.standfirst {
-  max-width: var(--measure);
-  margin: var(--space-5) 0 0;
-  font-family: var(--font-body);
-  font-size: clamp(1.1rem, 1rem + 0.4vw, 1.25rem);
-  font-style: italic;
-  line-height: 1.35;
-  color: var(--ink);
-}
+.standfirst { font-family: var(--font-body); font-style: italic; font-size: 1.05em; color: var(--ink); }
 .byline {
   margin: 0;
   font-family: var(--font-ui);
@@ -345,7 +337,7 @@ h3 {
   flex-wrap: wrap;
   align-items: center;
   gap: 0 var(--space-3);
-  margin-top: var(--space-1);
+  margin-top: var(--space-2);
   font-family: var(--font-ui);
   font-size: var(--text-meta);
   color: var(--muted);

@@ -45,12 +45,14 @@ const photoSizes = await Promise.all(photos.map((p) => imageMetadata(readFileSyn
 const webp = (src: string) => src.replace(/\.jpe?g$/, '.webp');
 ---
 <Base title={page.data.title} description={page.data.description}>
-  {/* Title block: headline, byline, then the author's own line and places */}
+  {/* Title block: headline, then a byline with the author's own line, then his places */}
   <header class="page-head">
     <h1>{page.data.title}</h1>
-    <p class="byline">By <span class="byline-name">Vitor Figueredo</span> · <a href={`${base}about/#my-connection-to-brazil`}>My connection to Brazil</a></p>
-    {/* The author's line about himself, then the places that back it up */}
-    {page.data.standfirst && <p class="standfirst">{page.data.standfirst}</p>}
+    <p class="byline">
+      By <span class="byline-name">Vitor Figueredo</span> ·
+      {page.data.standfirst && <><span class="standfirst">{page.data.standfirst.replace(/\.$/, '')}</span> · </>}
+      <a href={`${base}about/#my-connection-to-brazil`}>My connection to Brazil</a>
+    </p>
     {/* The author's places, the same yellow marks as on the map: pointing to one shows its photo */}
     {authorPlaces.length > 0 && (
       <div class="my-places">
